@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>城市灵魂坐标：25项特质深度测评</title>
+    <style>
+        :root { --primary: #e67e22; --text-dark: #2c3e50; --bg-base: #fdf6e3; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* 动态氛围背景 */
+        body { 
+            background-color: var(--bg-base); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.5;
+            animation: pulse 10s infinite alternate;
+        }
+        body::before { width: 450px; height: 450px; background: #f1c40f; top: -100px; left: -150px; }
+        body::after { width: 400px; height: 400px; background: #ff9a9e; bottom: -50px; right: -100px; animation-delay: -5s; }
+        
+        @keyframes pulse {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 20px) scale(1.1); }
+        }
+
+        /* 磨砂玻璃容器 */
+        .container { 
+            width: 100%; 
+            max-width: 480px; 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            border-radius: 35px; 
+            padding: 45px 28px; 
+            box-shadow: 0 25px 55px rgba(0,0,0,0.1); 
+            position: relative; 
+            z-index: 10; 
+            transition: all 0.4s ease;
+        }
+
+        .progress-bar { 
+            position: absolute; 
+            top: 0; left: 0; 
+            height: 8px; 
+            background: linear-gradient(to right, #f39c12, var(--primary)); 
+            transition: width 0.3s; 
+            border-radius: 35px 35px 0 0; 
+        }
+
+        h1 { color: var(--primary); font-size: 1.8rem; font-weight: 900; margin-bottom: 15px; text-align: center; letter-spacing: 1px; }
+        .subtitle { font-size: 1rem; color: var(--text-dark); line-height: 1.7; margin-bottom: 40px; text-align: center; opacity: 0.9; }
+        .step-count { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 12px; font-weight: 600; letter-spacing: 1px; }
+        
+        .question-box h2 { font-size: 1.2rem; margin-bottom: 28px; line-height: 1.5; color: var(--text-dark); font-weight: 700; }
+        
+        /* 交互选项 */
+        .option { 
+            display: block; width: 100%; padding: 18px 22px; margin-bottom: 15px; 
+            border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px; 
+            background: rgba(255, 255, 255, 0.7); color: var(--text-dark); 
+            cursor: pointer; transition: 0.3s; font-size: 1rem; text-align: left; 
+        }
+        .option:hover { 
+            border-color: var(--primary); color: var(--primary); 
+            transform: translateX(8px); background: #fff; 
+        }
+
+        .btn-main { 
+            background: linear-gradient(135deg, #f39c12, var(--primary)); 
+            color: white; font-weight: bold; padding: 20px; border-radius: 50px; 
+            border: none; width: 100%; cursor: pointer; font-size: 1.2rem; 
+            box-shadow: 0 10px 25px rgba(230,126,34,0.3); 
+            transition: transform 0.2s;
+        }
+        .btn-main:active { transform: scale(0.96); }
+
+        .hidden { display: none !important; }
+
+        /* 结果展示 */
+        .city-name { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 20px 0; letter-spacing: 5px; text-align: center; text-shadow: 0 5px 15px rgba(230,126,34,0.2); }
+        .report-box { background: rgba(255,255,255,0.7); padding: 28px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.8); margin-top: 20px; }
+        .report-tag { display: inline-block; background: var(--primary); color: white; padding: 5px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; }
+        .report-text { font-size: 1.05rem; line-height: 1.9; color: #2c3e50; text-align: justify; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-bar" id="progress"></div>
+    
+    <div id="start-page">
+        <h1>城市灵魂坐标</h1>
+        <p class="subtitle">深度解析 25 项隐性性格潜特征<br>从全国 <strong>20 座</strong> 核心城市中锁定归宿</p>
+        <button class="btn-main" onclick="start()">开启深度测评</button>
+    </div>
+
+    <div id="quiz-page" class="hidden">
+        <p id="step-count" class="step-count"></p>
+        <div class="question-box">
+            <h2 id="q-text"></h2>
+            <div id="options"></div>
+        </div>
+    </div>
+
+    <div id="result-page" class="hidden">
+        <p style="text-align: center; font-size: 0.95rem; color: #7f8c8d;">测评结论 · 你的灵魂契合城市是</p>
+        <div class="city-name" id="res-city"></div>
+        <div class="report-box">
+            <div class="report-tag">深度测评报告</div>
+            <div class="report-text" id="res-desc"></div>
+        </div>
+        <button class="btn-main" style="margin-top: 35px;" onclick="location.reload()">重新测评</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { t: "1. 突然有了一个星期的长假，你第一时间想到的是？", o: [{ n: "考察行业趋势，寻找新风口", v: {gold: 4} }, { n: "找个没人的地方彻底“消失”", v: {free: 4} }, { n: "去体验最有名的苍蝇馆子和夜市", v: {spice: 4} }] },
+        { t: "2. 在你的价值观里，哪种生活更让你感到失败？", o: [{ n: "口袋空空，毫无社会资源和地位", v: {gold: 4} }, { n: "每天机械重复，失去好奇心", v: {free: 2, zen: 2} }, { n: "衣食无忧却没人可以喝酒聊天", v: {spice: 4} }] },
+        { t: "3. 你对“历史古迹”的态度通常是？", o: [{ n: "非常有兴趣，能看半天石碑", v: {culture: 4} }, { n: "拍照打卡圣地，发完朋友圈就走", v: {gold: 1} }, { n: "与其看死的古迹，不如逛菜市场", v: {spice: 3} }] },
+        { t: "4. 如果要创业，你更倾向于哪种行业？", o: [{ n: "金融、AI或高新科技领域", v: {gold: 4} }, { n: "独立书店、花店或艺术工作室", v: {zen: 4} }, { n: "有地方特色的餐饮或市井店面", v: {spice: 3} }] },
+        { t: "5. 你理想中的家应该装修成什么样？", o: [{ n: "极简科技感，各种全屋智能", v: {gold: 3} }, { n: "中式禅意或原木风，一定要有茶室", v: {zen: 4, culture: 2} }, { n: "温馨乱中有序，厨房必须好用", v: {spice: 3} }] },
+        { t: "6. 当你在工作中遇到巨大压力，你会？", o: [{ n: "更疯狂地投入工作，用结果减压", v: {gold: 4} }, { n: "买张机票说走就走，关机消失", v: {free: 4} }, { n: "吃顿最辣的火锅大哭大笑一场", v: {spice: 4} }] },
+        { t: "7. 你更喜欢哪种社交环境？", o: [{ n: "高端酒会，拓展人脉资源", v: {gold: 4} }, { n: "三两知己在安静吧台聊天", v: {zen: 4} }, { n: "在街边摊，光膀子喝啤酒", v: {spice: 4} }] },
+        { t: "8. 对于“规则”和“效率”，你的看法是？", o: [{ n: "社会进步基石，必须严格遵守", v: {gold: 4, culture: 1} }, { n: "看情况，生活不需要太紧绷", v: {spice: 2, zen: 2} }, { n: "规则就是用来打破的，自由万岁", v: {free: 4} }] },
+        { t: "9. 你如何看待一个城市的“老城区”？", o: [{ n: "应改造成高档写字楼或商场", v: {gold: 4} }, { n: "那是城市的灵魂，必须原样保护", v: {culture: 4} }, { n: "那是最好吃的地方，生活气息足", v: {spice: 4} }] },
+        { t: "10. 你的消费习惯更像哪种？", o: [{ n: "投资型消费，必须增值或增效", v: {gold: 4} }, { n: "审美型消费，只要好看就买", v: {zen: 4} }, { n: "体验型消费，钱花在吃喝玩乐", v: {spice: 4} }] },
+        { t: "11. 如果要你写一本书，你会写？", o: [{ n: "《如何在 30 岁实现财务自由》", v: {gold: 4} }, { n: "《消失在荒野里的灵魂》", v: {free: 4} }, { n: "《饮食男女的江湖往事》", v: {spice: 4, culture: 1} }] },
+        { t: "12. 你最不能容忍的一点是？", o: [{ n: "贫穷且毫无野心", v: {gold: 4} }, { n: "庸俗、没有审美品味", v: {zen: 4} }, { n: "虚伪、不接地气", v: {spice: 4} }] },
+        { t: "13. 假如生命只剩最后一年，你会去？", o: [{ n: "把钱赚够留给家人", v: {gold: 4} }, { n: "去无人区独自待着", v: {free: 4} }, { n: "回到家乡每天吃奶奶做的饭", v: {spice: 4, culture: 2} }] },
+        { t: "14. 你对“成功”的定义是？", o: [{ n: "拥有强大的社会地位和话语权", v: {gold: 4, culture: 2} }, { n: "能随心所欲控制自己的时间", v: {free: 4} }, { n: "身边有一群可以交心的老友", v: {spice: 4} }] },
+        { t: "15. 你在穿衣打扮上更倾向于？", o: [{ n: "商务、干练、显得专业", v: {gold: 3} }, { n: "棉麻、舒适、冷淡或复古风", v: {zen: 4, culture: 2} }, { n: "随性、怎么舒服怎么来", v: {free: 4} }] },
+        { t: "16. 面对新科技（如AI），你觉得？", o: [{ n: "巨大风口，必须马上上车", v: {gold: 4} }, { n: "破坏人的创造性和美感", v: {zen: 2, culture: 1} }, { n: "能帮我点外卖做家务就行", v: {spice: 2} }] },
+        { t: "17. 如果你失恋了，你会？", o: [{ n: "疯狂加班，用工作填满大脑", v: {gold: 4} }, { n: "去寺庙拜拜求个心安", v: {culture: 4, zen: 2} }, { n: "去海边把东西都扔了", v: {free: 4} }] },
+        { t: "18. 在社交圈里，你通常是？", o: [{ n: "组局者、资源链接者", v: {gold: 4} }, { n: "倾听者、那个通透的人", v: {zen: 4} }, { n: "气氛组、那个最会吃的", v: {spice: 4} }] },
+        { t: "19. 你心目中的“归属感”来源？", o: [{ n: "房产、存单和可见资产", v: {gold: 4} }, { n: "熟悉的口音、街道和那口汤", v: {spice: 4, culture: 1} }, { n: "内心宁静，在哪都一样", v: {free: 2, zen: 4} }] },
+        { t: "20. 最喜欢的交通工具？", o: [{ n: "高铁商务座或飞机头等舱", v: {gold: 4} }, { n: "慢悠悠小火车或双腿", v: {zen: 2, free: 4} }, { n: "电瓶车，只要快点到馆子", v: {spice: 2} }] },
+        { t: "21. 拥有一种超能力，你选？", o: [{ n: "看到未来的财富走向", v: {gold: 4} }, { n: "瞬间移动或时间变慢", v: {free: 4} }, { n: "让所有人瞬间开怀畅饮", v: {spice: 4} }] },
+        { t: "22. 看到有人晒豪车，你的反应？", o: [{ n: "默默点赞，激励自己搞钱", v: {gold: 4} }, { n: "觉得庸俗，直接屏蔽", v: {zen: 4} }, { n: "没感觉，不抢我吃的就行", v: {spice: 2} }] },
+        { t: "23. 对于“家庭”的看法？", o: [{ n: "赚钱是对家最大的负责", v: {gold: 4} }, { n: "要有共同审美和价值观", v: {zen: 4, culture: 1} }, { n: "一家人整齐吃每一顿饭", v: {spice: 4} }] },
+        { t: "24. 回到古代，你想成为？", o: [{ n: "富甲一方的大商人", v: {gold: 4} }, { n: "隐居深山的隐士或诗人", v: {zen: 4, free: 2} }, { n: "掌握天下美食的御膳房总管", v: {spice: 4} }] },
+        { t: "25. 测评快结束了，想法是？", o: [{ n: "快给我结果，别耽误正事", v: {gold: 4} }, { n: "希望结果能给我启示", v: {zen: 4, culture: 2} }, { n: "有点饿了，吃点什么好？", v: {spice: 4} }] }
+    ];
+
+    let scores = { gold: 0, zen: 0, spice: 0, culture: 0, free: 0 };
+    let currentIdx = 0;
+
+    function start() { document.getElementById('start-page').classList.add('hidden'); document.getElementById('quiz-page').classList.remove('hidden'); render(); }
+
+    function render() {
+        const q = questions[currentIdx];
+        document.getElementById('progress').style.width = ((currentIdx + 1) / questions.length * 100) + '%';
+        document.getElementById('step-count').innerText = `STEP ${currentIdx + 1} / ${questions.length}`;
+        document.getElementById('q-text').innerText = q.t;
+        const box = document.getElementById('options'); box.innerHTML = '';
+        q.o.forEach(opt => {
+            const btn = document.createElement('button'); btn.className = 'option'; btn.innerText = opt.n;
+            btn.onclick = () => {
+                for(let key in opt.v) scores[key] += opt.v[key];
+                currentIdx++;
+                setTimeout(() => { if(currentIdx < questions.length) render(); else showResult(); }, 150);
+            };
+            box.appendChild(btn);
+        });
+    }
+
+    function showResult() {
+        document.getElementById('quiz-page').classList.add('hidden');
+        document.getElementById('result-page').classList.remove('hidden');
+        const {gold, zen, spice, culture, free} = scores;
+        let city = "", desc = "";
+
+        if (gold >= 65) { city = "深圳"; desc = "你是纯粹的行动派，崇尚进化，讨厌平庸。深圳这座没有历史包袱、全速奔跑的城市，最能包容你的野心和对成功的渴望。"; }
+        else if (gold >= 50 && zen >= 30) { city = "上海"; desc = "你追求极致的体面与效率。上海这种精致到骨子里、又充满商业文明规则感的‘魔都’，是你实现自我价值的最佳舞台。"; }
+        else if (gold >= 40 && spice >= 40) { city = "广州"; desc = "你既要搞钱，也要生活。广州这种既有CBD的冷峻，又有老城区早茶温暖底色的‘务实之都’，是你最温暖的依靠。"; }
+        else if (zen >= 65) { city = "杭州"; desc = "你向往科技的便利，也眷恋湖光山色的宁静。杭州这种将互联网基因与西湖底蕴完美融合的城市，最契合你的频率。"; }
+        else if (zen >= 45 && culture >= 40) { city = "苏州"; desc = "你骨子里有一种文人的沉静，偏爱园林式的细致清雅。苏州这种‘小桥流水’与现代工业园并存的质感，是你理想的栖息地。"; }
+        else if (zen >= 45 && free >= 30) { city = "昆明"; desc = "你向往四季如春的平和，讨厌极端。昆明这种节奏缓慢、充满鲜花与阳光的‘春城’，能治愈你内心所有的紧绷。"; }
+        else if (spice >= 65) { city = "长沙"; desc = "你体内的热辣基因已经爆表！长沙这种满大街烟火气、不分昼夜、充满生命张力的不夜城，才是你的快乐老家。"; }
+        else if (spice >= 50 && free >= 40) { city = "重庆"; desc = "你是一个热烈直接的人，带着几分江湖气。重庆这种层峦叠嶂、魔幻且魔力十足的山城，最能接纳你滚烫的心。"; }
+        else if (spice >= 50 && zen >= 30) { city = "成都"; desc = "成都这种既繁华又安逸、充满巴适气息的城市，是你灵魂的避风港。你深刻领悟了工作是为了更好地生活。"; }
+        else if (culture >= 65 && gold >= 30) { city = "北京"; desc = "你是一个宏大叙事者，内心深处有强烈的使命感。北京这种汇聚顶级资源与厚重历史的地方，能支撑起你的梦想与格局。"; }
+        else if (culture >= 65) { city = "西安"; desc = "你厚重、深沉，对文化和历史有天然的敬畏。西安这种大唐遗风与现代摇滚并存的古都，最能照亮你内心深处的底蕴。"; }
+        else if (culture >= 45 && zen >= 30) { city = "南京"; desc = "你有一种忧郁且高贵的文艺气质。南京这种金陵帝王气与现代书卷气交织的城市，最适合你安静地思考人生。"; }
+        else if (culture >= 40 && spice >= 40) { city = "武汉"; desc = "你豪爽、大气，有一种不服输的韧劲。武汉这种大江大河、极具江湖生命力的城市，最能激发你骨子里的热血。"; }
+        else if (free >= 65) { city = "拉萨"; desc = "你拥有极其纯粹的精神世界。在那片离天空最近、充满信仰与旷野气息的高原，你才能找回失落的本真。"; }
+        else if (free >= 50 && zen >= 40) { city = "大理"; desc = "你是一个浪漫的理想主义者，向往风花雪月。苍山洱海间的自由与宁静，是你对抗世界平庸的最佳药方。"; }
+        else if (zen >= 30 && spice >= 40 && culture >= 20) { city = "泉州"; desc = "你迷恋那种半神半人的半刻清闲。泉州这种满街神佛、满城人间、极具古朴美学和商业基因的城市，是你的契合点。"; }
+        else if (zen >= 40 && spice >= 25) { city = "厦门"; desc = "你追求小资且舒适的生活质感。厦门这种清新、浪漫且富有商业活力的海岛城市，是你梦寐以求的归属。"; }
+        else if (spice >= 30 && zen >= 30) { city = "青岛"; desc = "你喜欢那种大开大合的海滨情怀。青岛这种既有欧陆风情、又有豪爽干杯气息的城市，承载了你的浪漫与豁达。"; }
+        else if (free >= 40 && spice >= 40) { city = "哈尔滨"; desc = "你拥有一种东北式的豪爽与浪漫，喜欢纯粹。哈尔滨这种冰雪建筑与人间温情并存的城市，能给你最温暖的归属感。"; }
+        else { city = "海口"; desc = "你向往阳光、沙滩和无尽夏天的慵懒。海口这种节奏极慢、充满热带气息的城市，能让你彻底放松身心。"; }
+
+        document.getElementById('res-city').innerText = city;
+        document.getElementById('res-desc').innerText = desc;
+    }
+</script>
+</body>
+</html>
